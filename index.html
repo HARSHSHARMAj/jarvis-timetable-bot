@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="theme-color" content="#0f0f1a" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Jarvis" />
+  <title>Jarvis — Boss ka Timetable</title>
+  <link rel="manifest" href="manifest.json" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+    :root{
+      --bg:#0f0f1a;--surface:#16172a;--card:#1e2040;--accent:#7c5cfc;
+      --accent2:#fc5c7d;--gold:#f5c842;--green:#2ecc71;--text:#f0f0ff;
+      --muted:#8888aa;--border:#2a2a4a;
+    }
+    body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
+
+    /* ── Header ── */
+    header{background:linear-gradient(135deg,#1a1a3e,#0f0f1a);padding:20px 16px 0;position:sticky;top:0;z-index:100;border-bottom:1px solid var(--border)}
+    .header-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+    .logo{display:flex;align-items:center;gap:10px}
+    .logo-icon{width:38px;height:38px;background:linear-gradient(135deg,var(--accent),var(--accent2));border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px}
+    .logo-text{font-size:20px;font-weight:800;background:linear-gradient(90deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+    .status-dot{width:10px;height:10px;background:var(--green);border-radius:50%;box-shadow:0 0 8px var(--green);animation:pulse 2s infinite}
+    @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+    .date-bar{padding:10px 0 14px;display:flex;justify-content:space-between;align-items:center}
+    .today-label{font-size:13px;color:var(--muted);font-weight:500}
+    .today-date{font-size:15px;font-weight:700;color:var(--text)}
+    .notif-btn{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:6px 12px;color:var(--text);font-size:12px;font-family:'Outfit',sans-serif;cursor:pointer;transition:.2s}
+    .notif-btn:active{transform:scale(.95)}
+
+    /* ── Progress Bar ── */
+    .progress-section{padding:0 16px 16px}
+    .progress-label{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-bottom:6px}
+    .progress-track{height:6px;background:var(--border);border-radius:99px;overflow:hidden}
+    .progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:99px;transition:width .5s ease}
+
+    /* ── Tab Bar ── */
+    .tab-bar{display:flex;gap:6px;padding:0 16px 12px}
+    .tab{flex:1;padding:8px;text-align:center;border-radius:10px;font-size:12px;font-weight:600;border:1px solid var(--border);background:var(--surface);color:var(--muted);cursor:pointer;transition:.2s}
+    .tab.active{background:var(--accent);border-color:var(--accent);color:#fff}
+
+    /* ── Main Content ── */
+    main{padding:16px;padding-bottom:100px}
+
+    /* ── Current Task Banner ── */
+    #current-banner{display:none;background:linear-gradient(135deg,var(--accent),var(--accent2));border-radius:16px;padding:16px;margin-bottom:16px;animation:slideIn .4s ease}
+    @keyframes slideIn{from{transform:translateY(-10px);opacity:0}to{transform:translateY(0);opacity:1}}
+    .banner-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;opacity:.8;margin-bottom:4px}
+    .banner-task{font-size:22px;font-weight:800}
+    .banner-note{font-size:13px;opacity:.85;margin-top:4px}
+    .banner-time{font-size:12px;margin-top:8px;opacity:.7}
+
+    /* ── Task Cards ── */
+    .task-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px 16px;margin-bottom:10px;display:flex;align-items:center;gap:12px;transition:.3s;position:relative;overflow:hidden}
+    .task-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--border);border-radius:4px 0 0 4px}
+    .task-card.upcoming::before{background:var(--accent)}
+    .task-card.done::before{background:var(--green)}
+    .task-card.active-now{border-color:var(--accent);background:linear-gradient(135deg,rgba(124,92,252,.15),rgba(252,92,125,.1));box-shadow:0 0 20px rgba(124,92,252,.2)}
+    .task-card.active-now::before{background:linear-gradient(180deg,var(--accent),var(--accent2))}
+    .task-time-badge{min-width:52px;text-align:center}
+    .task-time{font-size:15px;font-weight:700;color:var(--text)}
+    .task-ampm{font-size:10px;color:var(--muted);font-weight:500}
+    .task-info{flex:1;min-width:0}
+    .task-name{font-size:15px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .task-note{font-size:12px;color:var(--muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .task-card.done .task-name{color:var(--muted);text-decoration:line-through}
+    .task-status{font-size:18px}
+    .section-title{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin:16px 0 8px;padding-left:4px}
+
+    /* ── Empty State ── */
+    .empty{text-align:center;padding:60px 20px;color:var(--muted)}
+    .empty-icon{font-size:48px;margin-bottom:12px}
+    .empty h3{font-size:18px;margin-bottom:8px;color:var(--text)}
+
+    /* ── Alarm Overlay ── */
+    #alarm-overlay{display:none;position:fixed;inset:0;z-index:999;background:linear-gradient(135deg,#0a0015,#1a0030);flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px;animation:alarmIn .3s ease}
+    @keyframes alarmIn{from{opacity:0;transform:scale(.9)}to{opacity:1;transform:scale(1)}}
+    #alarm-overlay.show{display:flex}
+    .alarm-ring{font-size:80px;animation:ring 1s ease infinite alternate}
+    @keyframes ring{from{transform:rotate(-15deg) scale(1)}to{transform:rotate(15deg) scale(1.1)}}
+    .alarm-time-big{font-size:72px;font-weight:800;background:linear-gradient(135deg,#fff,#ccc);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin:8px 0}
+    .alarm-task-big{font-size:28px;font-weight:800;color:#fff;margin-bottom:8px}
+    .alarm-note-big{font-size:16px;color:rgba(255,255,255,.7);margin-bottom:32px;max-width:300px}
+    .dismiss-btn{background:linear-gradient(135deg,var(--accent),var(--accent2));border:none;border-radius:99px;padding:16px 48px;font-size:18px;font-weight:700;color:#fff;font-family:'Outfit',sans-serif;cursor:pointer;box-shadow:0 8px 30px rgba(124,92,252,.5);transition:.2s}
+    .dismiss-btn:active{transform:scale(.95)}
+    .alarm-pulse{position:absolute;width:300px;height:300px;border-radius:50%;border:2px solid rgba(124,92,252,.3);animation:expand 2s ease-out infinite}
+    .alarm-pulse2{animation-delay:.7s}
+    @keyframes expand{from{transform:scale(.5);opacity:1}to{transform:scale(2);opacity:0}}
+
+    /* ── Bottom Nav ── */
+    .bottom-nav{position:fixed;bottom:0;left:0;right:0;background:rgba(22,23,42,.95);backdrop-filter:blur(20px);border-top:1px solid var(--border);padding:10px 24px 20px;display:flex;justify-content:space-around;z-index:100}
+    .nav-item{display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;opacity:.5;transition:.2s;flex:1}
+    .nav-item.active{opacity:1}
+    .nav-item .nav-icon{font-size:22px}
+    .nav-item .nav-label{font-size:10px;font-weight:600}
+
+    /* ── Sync indicator ── */
+    #sync-bar{display:none;background:rgba(44,204,113,.1);border:1px solid rgba(44,204,113,.3);border-radius:10px;padding:8px 12px;margin-bottom:12px;font-size:12px;color:var(--green);display:flex;align-items:center;gap:8px}
+    .sync-spinner{width:14px;height:14px;border:2px solid rgba(44,204,113,.3);border-top-color:var(--green);border-radius:50%;animation:spin 1s linear infinite}
+    @keyframes spin{to{transform:rotate(360deg)}}
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="header-top">
+    <div class="logo">
+      <div class="logo-icon">🤖</div>
+      <span class="logo-text">Jarvis</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px">
+      <div class="status-dot" id="status-dot" title="Online"></div>
+      <button class="notif-btn" onclick="requestNotifPermission()" id="notif-btn">🔔 Enable Alerts</button>
+    </div>
+  </div>
+  <div class="date-bar">
+    <div>
+      <div class="today-label">Aaj ka Din</div>
+      <div class="today-date" id="today-label">Loading...</div>
+    </div>
+    <div style="text-align:right">
+      <div class="today-label">Abhi</div>
+      <div class="today-date" id="live-clock">--:--</div>
+    </div>
+  </div>
+  <div class="progress-section">
+    <div class="progress-label">
+      <span>Aaj ka Progress</span>
+      <span id="progress-text">0 / 0 done</span>
+    </div>
+    <div class="progress-track"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
+  </div>
+</header>
+
+<main id="main-content">
+  <div id="sync-bar">
+    <div class="sync-spinner"></div>
+    <span>Timetable sync ho raha hai...</span>
+  </div>
+  <div id="task-list"><div class="empty"><div class="empty-icon">⏳</div><h3>Loading Timetable...</h3></div></div>
+</main>
+
+<!-- Alarm Overlay -->
+<div id="alarm-overlay">
+  <div class="alarm-pulse"></div>
+  <div class="alarm-pulse alarm-pulse2"></div>
+  <div class="alarm-ring">🚨</div>
+  <div class="alarm-time-big" id="alarm-time-big">--:--</div>
+  <div class="alarm-task-big" id="alarm-task-big">Task</div>
+  <div class="alarm-note-big" id="alarm-note-big"></div>
+  <button class="dismiss-btn" onclick="dismissAlarm()">✅ Shuru Karo Boss!</button>
+</div>
+
+<div class="bottom-nav">
+  <div class="nav-item active" onclick="showTab('today')">
+    <span class="nav-icon">📅</span><span class="nav-label">Aaj</span>
+  </div>
+  <div class="nav-item" onclick="showTab('all')">
+    <span class="nav-icon">📋</span><span class="nav-label">Sab Tasks</span>
+  </div>
+  <div class="nav-item" onclick="syncNow()">
+    <span class="nav-icon">🔄</span><span class="nav-label">Sync</span>
+  </div>
+</div>
+
+<script>
+// ── CONFIG ──────────────────────────────────────────────
+const GITHUB_RAW = 'https://raw.githubusercontent.com/HARSHSHARMAj/jarvis-timetable-bot/main/timetable_config.json';
+const CACHE_KEY  = 'jarvis_timetable_v1';
+const FIRED_KEY  = 'jarvis_fired_today';
+
+// ── State ───────────────────────────────────────────────
+let timetable = [];
+let alarmAudio = null;
+let currentTab = 'today';
+let firedToday = {};
+
+// ── Boot ────────────────────────────────────────────────
+window.addEventListener('DOMContentLoaded', async () => {
+  loadFired();
+  updateClock();
+  setInterval(updateClock, 1000);
+  setInterval(checkAlarms, 15000); // check every 15 seconds
+  await loadTimetable();
+  render();
+  if(Notification.permission === 'granted') updateNotifBtn(true);
+});
+
+function updateClock() {
+  const now = new Date();
+  const days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const hh = String(now.getHours()).padStart(2,'0');
+  const mm = String(now.getMinutes()).padStart(2,'0');
+  document.getElementById('live-clock').textContent = hh+':'+mm;
+  document.getElementById('today-label').textContent =
+    days[now.getDay()] + ', ' + now.getDate() + ' ' + months[now.getMonth()];
+}
+
+// ── Timetable Load ───────────────────────────────────────
+async function loadTimetable(showSyncBar=false) {
+  if(showSyncBar) document.getElementById('sync-bar').style.display='flex';
+  try {
+    const r = await fetch(GITHUB_RAW + '?t=' + Date.now());
+    if(!r.ok) throw new Error('fetch failed');
+    timetable = await r.json();
+    localStorage.setItem(CACHE_KEY, JSON.stringify(timetable));
+    document.getElementById('status-dot').style.background='#2ecc71';
+    document.getElementById('status-dot').style.boxShadow='0 0 8px #2ecc71';
+  } catch(e) {
+    // Try cache
+    const c = localStorage.getItem(CACHE_KEY);
+    if(c) {
+      timetable = JSON.parse(c);
+      document.getElementById('status-dot').style.background='#f5c842';
+      document.getElementById('status-dot').style.boxShadow='0 0 8px #f5c842';
+    }
+  } finally {
+    document.getElementById('sync-bar').style.display='none';
+    render();
+  }
+}
+
+function syncNow() { loadTimetable(true); }
+
+// ── Render ───────────────────────────────────────────────
+function render() {
+  const now = new Date();
+  const hh  = String(now.getHours()).padStart(2,'0');
+  const mm  = String(now.getMinutes()).padStart(2,'0');
+  const cur = hh+':'+mm;
+  const day = now.toLocaleDateString('en-US',{weekday:'long'}).toLowerCase();
+
+  const todayTasks = timetable.filter(t =>
+    t.active !== false &&
+    (t.days || ['monday','tuesday','wednesday','thursday','friday','saturday','sunday']).includes(day)
+  ).sort((a,b)=>a.time.localeCompare(b.time));
+
+  // Progress
+  const past = todayTasks.filter(t=>t.time < cur).length;
+  const total = todayTasks.length;
+  document.getElementById('progress-text').textContent = past+' / '+total+' done';
+  document.getElementById('progress-fill').style.width = total ? (past/total*100)+'%' : '0%';
+
+  if(currentTab==='today') renderToday(todayTasks, cur);
+  else renderAll();
+}
+
+function renderToday(tasks, cur) {
+  const list = document.getElementById('task-list');
+  if(!tasks.length){list.innerHTML='<div class="empty"><div class="empty-icon">🎉</div><h3>Koi task nahi aaj!</h3><p style="color:var(--muted);font-size:14px">Aaram karo Boss 😄</p></div>';return;}
+
+  let html='';
+  let nowTask = null;
+  const upcoming = [], past = [];
+  tasks.forEach(t=>{
+    if(t.time===cur) nowTask=t;
+    else if(t.time>cur) upcoming.push(t);
+    else past.push(t);
+  });
+
+  if(nowTask){
+    html += `<div style="background:linear-gradient(135deg,var(--accent),var(--accent2));border-radius:16px;padding:16px;margin-bottom:14px">
+      <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;opacity:.8;margin-bottom:4px">🔥 ABHI KA TASK</div>
+      <div style="font-size:22px;font-weight:800">${nowTask.name}</div>
+      ${nowTask.note?`<div style="font-size:13px;opacity:.85;margin-top:4px">${nowTask.note}</div>`:''}
+      <div style="font-size:12px;margin-top:8px;opacity:.7">⏰ ${fmt(nowTask.time)}</div>
+    </div>`;
+  }
+
+  if(upcoming.length){
+    html+='<div class="section-title">⏳ Aane Wale Tasks</div>';
+    upcoming.forEach(t=>{html+=taskCard(t,'upcoming');});
+  }
+  if(past.length){
+    html+='<div class="section-title">✅ Ho Gaye</div>';
+    past.forEach(t=>{html+=taskCard(t,'done');});
+  }
+  list.innerHTML=html;
+}
+
+function renderAll() {
+  const list = document.getElementById('task-list');
+  const sorted = [...timetable].sort((a,b)=>a.time.localeCompare(b.time));
+  if(!sorted.length){list.innerHTML='<div class="empty"><div class="empty-icon">📋</div><h3>Koi task nahi</h3></div>';return;}
+  list.innerHTML='<div class="section-title">📋 Saare Tasks ('+sorted.length+')</div>'+sorted.map(t=>taskCard(t,'upcoming')).join('');
+}
+
+function taskCard(t, state) {
+  const [h,m] = t.time.split(':');
+  const hour = parseInt(h);
+  const ampm = hour>=12?'PM':'AM';
+  const h12  = hour%12||12;
+  return `<div class="task-card ${state}">
+    <div class="task-time-badge">
+      <div class="task-time">${h12}:${m}</div>
+      <div class="task-ampm">${ampm}</div>
+    </div>
+    <div class="task-info">
+      <div class="task-name">${t.name}</div>
+      ${t.note?`<div class="task-note">${t.note}</div>`:'<div class="task-note">Koi note nahi</div>'}
+    </div>
+    <div class="task-status">${state==='done'?'✅':'⏰'}</div>
+  </div>`;
+}
+
+function fmt(time) {
+  const [h,m] = time.split(':');
+  const hour = parseInt(h);
+  return (hour%12||12)+':'+m+' '+(hour>=12?'PM':'AM');
+}
+
+function showTab(tab) {
+  currentTab = tab;
+  document.querySelectorAll('.nav-item').forEach((el,i)=>el.classList.toggle('active', ['today','all','sync'][i]===tab));
+  render();
+}
+
+// ── Alarm System ─────────────────────────────────────────
+function loadFired() {
+  const today = new Date().toDateString();
+  const stored = JSON.parse(localStorage.getItem(FIRED_KEY)||'{}');
+  firedToday = (stored.date===today) ? stored.tasks : {};
+}
+function saveFired() {
+  localStorage.setItem(FIRED_KEY, JSON.stringify({date:new Date().toDateString(),tasks:firedToday}));
+}
+
+function checkAlarms() {
+  const now = new Date();
+  const cur = String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0');
+  const day = now.toLocaleDateString('en-US',{weekday:'long'}).toLowerCase();
+
+  timetable.forEach(task => {
+    if(task.active===false) return;
+    const days = task.days || ['monday','tuesday','wednesday','thursday','friday','saturday','sunday'];
+    if(!days.includes(day)) return;
+    if(task.time !== cur) return;
+    const key = task.time+'|'+(task.id||task.name);
+    if(firedToday[key]) return;
+    firedToday[key] = true;
+    saveFired();
+    fireAlarm(task);
+  });
+  render();
+}
+
+function fireAlarm(task) {
+  // Show full-screen overlay
+  document.getElementById('alarm-time-big').textContent = fmt(task.time);
+  document.getElementById('alarm-task-big').textContent = task.name;
+  document.getElementById('alarm-note-big').textContent = task.note || 'Shuru karo Boss! Koi bahana nahi!';
+  document.getElementById('alarm-overlay').classList.add('show');
+
+  // Play alarm sound
+  playAlarmSound();
+
+  // Browser notification
+  if(Notification.permission==='granted') {
+    new Notification('🚨 Jarvis Alert - Boss!', {
+      body: fmt(task.time)+' — '+task.name+(task.note?' — '+task.note:''),
+      icon: 'icon-192.png',
+      badge: 'icon-192.png',
+      vibrate: [300,100,300,100,300],
+      requireInteraction: true,
+      tag: 'jarvis-alarm'
+    });
+  }
+
+  // Vibrate
+  if(navigator.vibrate) navigator.vibrate([500,200,500,200,500,200,500]);
+}
+
+function playAlarmSound() {
+  try {
+    const ctx = new (window.AudioContext||window.webkitAudioContext)();
+    function beep(freq, start, dur) {
+      const o = ctx.createOscillator();
+      const g = ctx.createGain();
+      o.connect(g); g.connect(ctx.destination);
+      o.frequency.value = freq;
+      g.gain.setValueAtTime(0,start);
+      g.gain.linearRampToValueAtTime(0.4,start+0.05);
+      g.gain.linearRampToValueAtTime(0,start+dur-0.05);
+      o.start(start); o.stop(start+dur);
+    }
+    for(let i=0;i<6;i++){
+      beep(880, ctx.currentTime + i*0.4, 0.3);
+      beep(1320, ctx.currentTime + i*0.4+0.15, 0.2);
+    }
+  } catch(e) {}
+}
+
+function dismissAlarm() {
+  document.getElementById('alarm-overlay').classList.remove('show');
+  if(alarmAudio) { alarmAudio.pause(); alarmAudio=null; }
+}
+
+// ── Notifications ────────────────────────────────────────
+async function requestNotifPermission() {
+  if(!('Notification' in window)) { alert('Aapka browser notifications support nahi karta'); return; }
+  const perm = await Notification.requestPermission();
+  if(perm==='granted') {
+    updateNotifBtn(true);
+    new Notification('✅ Jarvis Connected!', {body:'Ab notifications milenge Boss! Timetable check ho raha hai...',icon:'icon-192.png'});
+  }
+}
+function updateNotifBtn(ok) {
+  const btn = document.getElementById('notif-btn');
+  if(ok) { btn.textContent='✅ Alerts ON'; btn.style.background='rgba(46,204,113,.2)'; btn.style.borderColor='#2ecc71'; btn.style.color='#2ecc71'; }
+}
+
+// ── Service Worker ───────────────────────────────────────
+if('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js').catch(()=>{});
+}
+</script>
+</body>
+</html>
