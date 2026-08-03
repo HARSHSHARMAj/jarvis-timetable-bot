@@ -144,6 +144,38 @@
     ]
   },
   {
+    "id": 1785733793432.7915,
+    "time": "10:41",
+    "name": "sleep",
+    "note": "",
+    "active": true,
+    "days": [
+      "monday",
+      "tuesday",
+      "wednesday",
+      "thursday",
+      "friday",
+      "saturday",
+      "sunday"
+    ]
+  },
+  {
+    "id": 1785734393195.8877,
+    "time": "10:52",
+    "name": "Science",
+    "note": "",
+    "active": true,
+    "days": [
+      "monday",
+      "tuesday",
+      "wednesday",
+      "thursday",
+      "friday",
+      "saturday",
+      "sunday"
+    ]
+  },
+  {
     "id": 1785564334244.4885,
     "time": "10:55",
     "name": "BREAK",
