@@ -68,7 +68,7 @@
     "time": "08:40",
     "name": "BREAK",
     "note": "Nashta",
-    "active": true,
+    "active": false,
     "days": [
       "monday",
       "tuesday",
