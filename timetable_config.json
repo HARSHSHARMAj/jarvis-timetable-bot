@@ -64,22 +64,6 @@
     ]
   },
   {
-    "id": 1785564334244.2952,
-    "time": "08:40",
-    "name": "BREAK",
-    "note": "Nashta",
-    "active": false,
-    "days": [
-      "monday",
-      "tuesday",
-      "wednesday",
-      "thursday",
-      "friday",
-      "saturday",
-      "sunday"
-    ]
-  },
-  {
     "id": 1785564334244.5764,
     "time": "08:55",
     "name": "REASONING",
