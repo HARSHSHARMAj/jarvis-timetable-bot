@@ -4,7 +4,7 @@
     "time": "06:00",
     "name": "REVISION",
     "note": "Warm-up — kal ka revise, bina dekhe bolna/likhna (Active Recall)",
-    "active": true,
+    "active": false,
     "days": [
       "monday",
       "tuesday",
