@@ -1,21 +1,5 @@
 [
   {
-    "id": 1785564334244.344,
-    "time": "06:00",
-    "name": "REVISION",
-    "note": "Warm-up — kal ka revise, bina dekhe bolna/likhna (Active Recall)",
-    "active": false,
-    "days": [
-      "monday",
-      "tuesday",
-      "wednesday",
-      "thursday",
-      "friday",
-      "saturday",
-      "sunday"
-    ]
-  },
-  {
     "id": 1785564334244.4885,
     "time": "06:10",
     "name": "MATHS",
