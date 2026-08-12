@@ -14,5 +14,21 @@
       "saturday",
       "sunday"
     ]
+  },
+  {
+    "id": 1786519236558.1685,
+    "time": "11:00",
+    "name": "english",
+    "note": "1 hr english ka class basics se",
+    "active": true,
+    "days": [
+      "monday",
+      "tuesday",
+      "wednesday",
+      "thursday",
+      "friday",
+      "saturday",
+      "sunday"
+    ]
   }
 ]
