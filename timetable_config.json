@@ -30,5 +30,21 @@
       "saturday",
       "sunday"
     ]
+  },
+  {
+    "id": 1786519280084.6514,
+    "time": "14:00",
+    "name": "Full Stack web -development ka class",
+    "note": "3 hr",
+    "active": true,
+    "days": [
+      "monday",
+      "tuesday",
+      "wednesday",
+      "thursday",
+      "friday",
+      "saturday",
+      "sunday"
+    ]
   }
 ]
