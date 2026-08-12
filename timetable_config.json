@@ -46,5 +46,21 @@
       "saturday",
       "sunday"
     ]
+  },
+  {
+    "id": 1786519341125.3855,
+    "time": "19:00",
+    "name": "Resoning",
+    "note": "2 hr",
+    "active": true,
+    "days": [
+      "monday",
+      "tuesday",
+      "wednesday",
+      "thursday",
+      "friday",
+      "saturday",
+      "sunday"
+    ]
   }
 ]
